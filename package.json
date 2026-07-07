@@ -1,0 +1,13 @@
+{
+  "name": "clear-see-prototype",
+  "version": "1.0.0",
+  "description": "Hackathon prototype for LISS-IV cloud removal using Generative AI and Sentinel-1 SAR fusion",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0"
+  }
+}
