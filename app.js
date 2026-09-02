@@ -117,13 +117,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function updateParallaxPosition() {
-    mouseX += (targetX - mouseX) * 0.08;
-    mouseY += (targetY - mouseY) * 0.08;
+    mouseX += (targetX - mouseX) * 0.1;
+    mouseY += (targetY - mouseY) * 0.1;
 
     const scrollY = window.scrollY || document.documentElement.scrollTop;
     
     if (bgLayer) {
-      bgLayer.style.transform = `translate3d(${mouseX * -35}px, ${mouseY * -25 - scrollY * 0.12}px, 0) scale(1.06)`;
+      bgLayer.style.transform = `translate3d(${mouseX * -75}px, ${mouseY * -55 - scrollY * 0.18}px, 0) scale(1.08)`;
     }
 
     requestAnimationFrame(updateParallaxPosition);
