@@ -87,9 +87,54 @@ document.addEventListener('DOMContentLoaded', () => {
     gangtok: { name: 'Gangtok (Mountain Snow Peaks)', coords: '27.3314° N, 88.6138° E' }
   };
 
+  // --- Background Image Mapping for Tabs ---
+  const tabBackgrounds = {
+    overview: 'bg_overview.jpg',
+    sandbox: 'bg_sandbox.jpg',
+    threedee: 'bg_threedee.png',
+    architectures: 'bg_threedee.png',
+    metrics: 'bg_sandbox.jpg',
+    details: 'bg_overview.jpg'
+  };
+
+  const bgLayer = document.getElementById('parallax-bg-layer');
+
+  function updateTabBackground(tabId) {
+    if (!bgLayer) return;
+    const bgImg = tabBackgrounds[tabId] || 'bg_overview.jpg';
+    bgLayer.style.backgroundImage = `url('${bgImg}')`;
+  }
+
+  // --- Smooth Parallax Mouse & Scroll Movement ---
+  let mouseX = 0;
+  let mouseY = 0;
+  let targetX = 0;
+  let targetY = 0;
+
+  window.addEventListener('mousemove', (e) => {
+    targetX = (e.clientX / window.innerWidth - 0.5);
+    targetY = (e.clientY / window.innerHeight - 0.5);
+  });
+
+  function updateParallaxPosition() {
+    mouseX += (targetX - mouseX) * 0.08;
+    mouseY += (targetY - mouseY) * 0.08;
+
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    
+    if (bgLayer) {
+      bgLayer.style.transform = `translate3d(${mouseX * -35}px, ${mouseY * -25 - scrollY * 0.12}px, 0) scale(1.06)`;
+    }
+
+    requestAnimationFrame(updateParallaxPosition);
+  }
+
+  updateParallaxPosition();
+
   // --- Tab Navigation Logic ---
   window.switchTab = function(tabId) {
     activeTab = tabId;
+    updateTabBackground(tabId);
     
     // Update active tab link styling
     navItems.forEach(item => {
