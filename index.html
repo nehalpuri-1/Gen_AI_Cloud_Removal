@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CLEAR_SEE | Cloud Removal & Surface Reconstruction for LISS-IV</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 </head>
 <body>
 
@@ -903,96 +902,6 @@
       </section>
 
     </main>
-  </div>
-
-  <!-- AI Civic Companion Floating Chat UI -->
-  <div class="fixed bottom-6 right-6 z-50 font-sans">
-    
-    <!-- Floating Action Button (FAB) -->
-    <button id="civic-chat-fab" class="flex items-center justify-center w-14 h-14 bg-gradient-to-tr from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white rounded-full shadow-lg hover:shadow-cyan-500/30 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer relative group">
-      <!-- Chat icon -->
-      <svg class="w-6 h-6 transition-transform duration-300 group-hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"></path>
-      </svg>
-      <!-- Pulse ping ring -->
-      <span class="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-cyan-500 border border-slate-900"></span>
-      </span>
-      <!-- Tooltip -->
-      <span class="absolute right-16 bg-slate-900/90 backdrop-blur-md text-cyan-400 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-800 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
-        Civic Companion AI
-      </span>
-    </button>
-
-    <!-- Chat Window Panel -->
-    <div id="civic-chat-window" class="hidden absolute bottom-18 right-0 w-96 max-w-[calc(100vw-2rem)] h-[550px] bg-slate-950/85 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 scale-95 opacity-0 origin-bottom-right">
-      
-      <!-- Chat Header -->
-      <div class="p-4 bg-gradient-to-r from-slate-900 to-slate-950 border-b border-slate-800 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 relative">
-            <!-- Bot SVG avatar -->
-            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25M7.5 12h9m-9-3h9m-9 6h9"></path>
-            </svg>
-            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-950 animate-pulse"></span>
-          </div>
-          <div>
-            <h4 id="civic-companion-title" class="font-bold text-slate-100 text-sm tracking-wide">Civic Companion</h4>
-            <span id="civic-status" class="text-[10px] text-emerald-400 font-semibold tracking-wider uppercase">Active</span>
-          </div>
-        </div>
-        
-        <!-- Action Row (Lang selector + Close) -->
-        <div class="flex items-center space-x-2.5">
-          <!-- Multilingual Segmented Toggle -->
-          <div class="flex bg-slate-900/80 p-0.5 rounded-lg border border-slate-800 text-[10px] font-bold text-slate-400">
-            <button id="lang-btn-en" data-lang="en" class="px-2 py-1 rounded-md transition-all duration-200 cursor-pointer bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">EN</button>
-            <button id="lang-btn-hi" data-lang="hi" class="px-2 py-1 rounded-md transition-all duration-200 cursor-pointer hover:text-slate-200">हिं</button>
-            <button id="lang-btn-ta" data-lang="ta" class="px-2 py-1 rounded-md transition-all duration-200 cursor-pointer hover:text-slate-200">தமிழ்</button>
-          </div>
-          
-          <!-- Close Button -->
-          <button id="civic-chat-close" class="text-slate-400 hover:text-slate-200 p-1 hover:bg-slate-900/60 rounded-md transition-colors cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Message History -->
-      <div id="civic-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-950/40 scrollbar-thin scrollbar-track-slate-950 scrollbar-thumb-slate-800">
-        <!-- Messages will be injected by JavaScript -->
-      </div>
-
-      <!-- Typing / Loading state container (hidden by default) -->
-      <div id="civic-chat-typing" class="hidden px-4 py-2 bg-slate-950/20 border-t border-slate-900/50 flex items-center space-x-2.5">
-        <div class="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-        </div>
-        <div class="flex items-center space-x-1 bg-slate-900/60 border border-slate-800 px-3 py-2 rounded-2xl rounded-tl-sm">
-          <span id="civic-typing-text" class="text-xs text-slate-400 mr-1.5 font-medium">Thinking...</span>
-          <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-          <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-          <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"></span>
-        </div>
-      </div>
-
-      <!-- Input Form -->
-      <form id="civic-chat-form" class="p-3 border-t border-slate-900 bg-slate-950/90 flex items-center space-x-2">
-        <input id="civic-chat-input" type="text" autocomplete="off" placeholder="Ask a civic question..." class="flex-1 bg-slate-900/60 border border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500/80 focus:ring-1 focus:ring-cyan-500/50 transition-all font-medium" />
-        <button id="civic-chat-send" type="submit" class="flex items-center justify-center p-2.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white rounded-xl shadow-lg shadow-cyan-500/10 active:scale-95 transition-all duration-200 cursor-pointer">
-          <svg class="w-4.5 h-4.5 transform rotate-45 -translate-x-0.5 translate-y-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"></path>
-          </svg>
-        </button>
-      </form>
-      
-    </div>
   </div>
 
   <!-- Include Application Code -->

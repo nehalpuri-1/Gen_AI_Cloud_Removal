@@ -4,7 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // --- State Variables ---
-  let activeTab = 'threedee';
+  let activeTab = 'overview';
   let activeRegion = 'shillong';
   let activeModel = 'diffusion';
   let reconstructionFidelity = 90;
@@ -13,107 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let showSarGuidance = true;
   let isDraggingSlider = false;
   let sliderPosition = 50; // percentage from left (0 to 100)
-
-  // --- Civic Companion Chat State & Translations ---
-  let chatIsOpen = false;
-  let chatLanguage = 'en'; // 'en', 'hi', 'ta'
-  const chatMessages = []; // { sender: 'bot'|'user', text: string }
-
-  const chatTranslations = {
-    en: {
-      title: "Civic Companion AI",
-      status: "Active",
-      placeholder: "Ask a civic question or report an issue...",
-      welcome: "Hello! I am your Civic Companion. Ask me anything about the city, satellite analysis, or click a 3D building to query it.",
-      send: "Send",
-      thinking: "Thinking...",
-      errorEmpty: "Please enter a message.",
-      defaultReply: "Thank you for your message. As your Civic Companion, I have logged this concern. Our satellite imagery helps us verify local conditions.",
-      buildingReplies: {
-        "City Hall": "You can report civic issues like potholes, street lighting, or public disturbances to the City Hall portal. Would you like me to open the ticket form?",
-        "Power Station": "The municipal Power Station is currently operating at 87% capacity. The solar grid integration is fully functional.",
-        "Water Treatment Facility": "Water quality levels are normal (TDS: 150 mg/L). Turbidity is low after filtration."
-      }
-    },
-    hi: {
-      title: "नागरिक साथी एआई",
-      status: "सक्रिय",
-      placeholder: "नागरिक प्रश्न पूछें या समस्या की रिपोर्ट करें...",
-      welcome: "नमस्ते! मैं आपका नागरिक साथी हूँ। शहर, उपग्रह विश्लेषण के बारे में कुछ भी पूछें, या पूछताछ के लिए किसी 3D इमारत पर क्लिक करें।",
-      send: "भेजें",
-      thinking: "सोच रहा हूँ...",
-      errorEmpty: "कृपया एक संदेश दर्ज करें।",
-      defaultReply: "आपके संदेश के लिए धन्यवाद। आपके नागरिक साथी के रूप में, मैंने इस चिंता को दर्ज कर लिया है। उपग्रह चित्र हमें स्थानीय स्थितियों को सत्यापित करने में मदद करते हैं।",
-      buildingReplies: {
-        "City Hall": "आप सिटी हॉल पोर्टल पर गड्ढों, स्ट्रीट लाइटिंग या सार्वजनिक अशांति जैसी नागरिक समस्याओं की रिपोर्ट कर सकते हैं। क्या आप चाहते हैं कि मैं टिकट फॉर्म खोलूं?",
-        "Power Station": "नगर निगम बिजली घर वर्तमान में 87% क्षमता पर काम कर रहा है। सौर ग्रिड एकीकरण पूरी तरह कार्यात्मक है।",
-        "Water Treatment Facility": "जल गुणवत्ता का स्तर सामान्य है (TDS: 150 mg/L)। निस्पंदन (फ़िल्टरेशन) के बाद मैलापन कम है।"
-      }
-    },
-    ta: {
-      title: "குடிமைத் தோழன் AI",
-      status: "செயலில் உள்ளது",
-      placeholder: "குடிமை வினாவைக் கேட்கவும் அல்லது புகாரைப் பதிவு செய்யவும்...",
-      welcome: "வணக்கம்! நான் உங்கள் குடிமைத் தோழன். நகரம், செயற்கைக்கோள் பகுப்பாய்வு பற்றி ஏதேனும் கேட்கலாம், அல்லது வினவ 3D கட்டிடத்தை கிளிக் செய்யவும்.",
-      send: "அனுப்பு",
-      thinking: "யோசிக்கிறது...",
-      errorEmpty: "தயவுசெய்து ஒரு செய்தியை உள்ளிடவும்.",
-      defaultReply: "உங்கள் செய்திக்கு நன்றி. உங்கள் குடிமைத் தோழனாக, நான் இந்த கவலையைப் பதிவு செய்துள்ளேன். உள்ளூர் நிலைமைகளை சரிபார்க்க செயற்கைக்கோள் படங்கள் எங்களுக்கு உதவுகின்றன.",
-      buildingReplies: {
-        "City Hall": "நெடுஞ்சாலை குழிகள், தெரு விளக்குகள் அல்லது பொது இடையூறுகள் போன்ற குடிமைப் பிரச்சனைகளை நீங்கள் நகர மண்டப போர்ட்டலில் புகாரளிக்கலாம். நான் உங்களுக்காகப் படிவத்தைத் திறக்கவா?",
-        "Power Station": "நகராட்சி மின் நிலையம் தற்போது 87% திறனில் இயங்குகிறது. சூரிய மின்சக்தி கட்டமைப்பு முழுமையாக செயல்படுகிறது.",
-        "Water Treatment Facility": "நீரின் தரம் சாதாரணமாக உள்ளது (TDS: 150 mg/L). வடிகட்டலுக்குப் பிறகு கலங்கல் அளவு குறைவாக உள்ளது."
-      }
-    }
-  };
-
-  const buildings = [
-    {
-      id: "city-hall",
-      name: { en: "City Hall", hi: "नगर निगम", ta: "நகர மண்டபம்" },
-      gridX: 14,
-      gridY: 14,
-      width: 4,
-      depth: 4,
-      height: 35,
-      color: "rgba(6, 182, 212, 0.8)", // Cyan
-      queries: {
-        en: "How can I report a civic issue at City Hall?",
-        hi: "मैं नगर निगम में नागरिक समस्या की रिपोर्ट कैसे कर सकता हूँ?",
-        ta: "நகர மண்டபத்தில் ஒரு குடிமைப் புகாரை நான் எவ்வாறு பதிவு செய்வது?"
-      }
-    },
-    {
-      id: "power-station",
-      name: { en: "Power Station", hi: "बिजली घर", ta: "மின் நிலையம்" },
-      gridX: 26,
-      gridY: 24,
-      width: 3.5,
-      depth: 3.5,
-      height: 45,
-      color: "rgba(245, 158, 11, 0.8)", // Amber
-      queries: {
-        en: "What is the solar energy output of the Power Station?",
-        hi: "बिजली घर का सौर ऊर्जा उत्पादन कितना है?",
-        ta: "மின் நிலையத்தின் சூரிய சக்தி உற்பத்தி எவ்வளவு?"
-      }
-    },
-    {
-      id: "water-treatment",
-      name: { en: "Water Treatment Facility", hi: "जल उपचार केंद्र", ta: "நீர் சுத்திகரிப்பு நிலையம்" },
-      gridX: 12,
-      gridY: 26,
-      width: 4,
-      depth: 3,
-      height: 25,
-      color: "rgba(16, 185, 129, 0.8)", // Emerald Green
-      queries: {
-        en: "How clean is the water from the Water Treatment Facility?",
-        hi: "जल उपचार केंद्र से पानी कितना साफ है?",
-        ta: "நீர் சுத்திகரிப்பு நிலையத்திலிருந்து வரும் நீர் எவ்வளவு சுத்தமானது?"
-      }
-    }
-  ];
 
   // --- DOM Elements ---
   const navItems = document.querySelectorAll('.nav-menu .nav-item');
@@ -212,8 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update headers
     if (pageTitles[tabId]) {
-      dynamicPageTitle.innerText = pageTitles[tabId].title;
-      dynamicPageDesc.innerText = pageTitles[tabId].desc;
+      if (dynamicPageTitle) dynamicPageTitle.innerText = pageTitles[tabId].title;
+      if (dynamicPageDesc) dynamicPageDesc.innerText = pageTitles[tabId].desc;
     }
 
     // Trigger canvas resize and rendering if sandbox is selected
@@ -241,12 +140,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Setup Canvas Resizing ---
   function resizeCanvases() {
+    if (!sliderContainer) return;
     const rect = sliderContainer.getBoundingClientRect();
     
     // Adjust canvas elements size to match CSS container
     [canvasCloudy, canvasReconstructed].forEach(canvas => {
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+      if (canvas) {
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+      }
     });
 
     renderSandboxVisuals();
@@ -262,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Procedural Canvas Image Generator ---
   // Generates realistic satellite features (Forests, Rivers, Urban grids, Mountains, Clouds)
   function renderSandboxVisuals() {
+    if (!canvasCloudy || !canvasReconstructed) return;
     const width = canvasCloudy.width;
     const height = canvasCloudy.height;
 
@@ -701,6 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Interactive Slider Handle Logic ---
   function updateComparisonSlider() {
+    if (!sliderDivider || !sliderOverlay) return;
     if (sliderPosition < 0) sliderPosition = 0;
     if (sliderPosition > 100) sliderPosition = 100;
     
@@ -713,102 +617,107 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle Dragging Events
   function getMouseX(e) {
+    if (!sliderContainer) return 0;
     const rect = sliderContainer.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     return clientX - rect.left;
   }
 
   function handleSliderMove(e) {
-    if (!isDraggingSlider) return;
+    if (!isDraggingSlider || !sliderContainer) return;
     const mouseX = getMouseX(e);
     const containerWidth = sliderContainer.getBoundingClientRect().width;
+    if (containerWidth === 0) return;
     sliderPosition = (mouseX / containerWidth) * 100;
     updateComparisonSlider();
   }
 
-  sliderContainer.addEventListener('mousedown', (e) => {
-    isDraggingSlider = true;
-    const mouseX = getMouseX(e);
-    const containerWidth = sliderContainer.getBoundingClientRect().width;
-    sliderPosition = (mouseX / containerWidth) * 100;
-    updateComparisonSlider();
-    e.preventDefault();
-  });
+  if (sliderContainer) {
+    sliderContainer.addEventListener('mousedown', (e) => {
+      isDraggingSlider = true;
+      const mouseX = getMouseX(e);
+      const containerWidth = sliderContainer.getBoundingClientRect().width;
+      if (containerWidth > 0) {
+        sliderPosition = (mouseX / containerWidth) * 100;
+        updateComparisonSlider();
+      }
+      e.preventDefault();
+    });
+
+    sliderContainer.addEventListener('touchstart', (e) => {
+      isDraggingSlider = true;
+      const mouseX = getMouseX(e);
+      const containerWidth = sliderContainer.getBoundingClientRect().width;
+      if (containerWidth > 0) {
+        sliderPosition = (mouseX / containerWidth) * 100;
+        updateComparisonSlider();
+      }
+    });
+  }
 
   window.addEventListener('mousemove', handleSliderMove);
   window.addEventListener('mouseup', () => { isDraggingSlider = false; });
-
-  // Touch support for mobiles/tablets
-  sliderContainer.addEventListener('touchstart', (e) => {
-    isDraggingSlider = true;
-    const mouseX = getMouseX(e);
-    const containerWidth = sliderContainer.getBoundingClientRect().width;
-    sliderPosition = (mouseX / containerWidth) * 100;
-    updateComparisonSlider();
-  });
   window.addEventListener('touchmove', handleSliderMove);
   window.addEventListener('touchend', () => { isDraggingSlider = false; });
 
-
   // --- Run Reconstruction Trigger Simulation ---
-  btnReconstruct.addEventListener('click', () => {
-    // Show loading overlay
-    processingOverlay.classList.add('visible');
-    btnReconstruct.disabled = true;
+  if (btnReconstruct) {
+    btnReconstruct.addEventListener('click', () => {
+      if (!processingOverlay) return;
+      // Show loading overlay
+      processingOverlay.classList.add('visible');
+      btnReconstruct.disabled = true;
 
-    // Reset processing steps UI styling
-    const steps = [
-      document.getElementById('step-0'),
-      document.getElementById('step-1'),
-      document.getElementById('step-2'),
-      document.getElementById('step-3')
-    ];
-    
-    steps.forEach(s => {
-      s.classList.remove('active', 'completed');
-    });
+      // Reset processing steps UI styling
+      const steps = [
+        document.getElementById('step-0'),
+        document.getElementById('step-1'),
+        document.getElementById('step-2'),
+        document.getElementById('step-3')
+      ];
+      
+      steps.forEach(s => {
+        if (s) s.classList.remove('active', 'completed');
+      });
 
-    // Step 0: Segments
-    steps[0].classList.add('active');
-    processingStatusText.innerText = "Step 1/4: Cloud Mask Segment Extraction...";
-    
-    setTimeout(() => {
-      steps[0].classList.remove('active');
-      steps[0].classList.add('completed');
-      steps[1].classList.add('active');
-      processingStatusText.innerText = "Step 2/4: Fusing Sentinel-1 SAR Polarizations...";
+      // Step 0: Segments
+      if (steps[0]) steps[0].classList.add('active');
+      if (processingStatusText) processingStatusText.innerText = "Step 1/4: Cloud Mask Segment Extraction...";
       
       setTimeout(() => {
-        steps[1].classList.remove('active');
-        steps[1].classList.add('completed');
-        steps[2].classList.add('active');
-        processingStatusText.innerText = "Step 3/4: Fetching Multi-temporal References...";
+        if (steps[0]) { steps[0].classList.remove('active'); steps[0].classList.add('completed'); }
+        if (steps[1]) steps[1].classList.add('active');
+        if (processingStatusText) processingStatusText.innerText = "Step 2/4: Fusing Sentinel-1 SAR Polarizations...";
         
         setTimeout(() => {
-          steps[2].classList.remove('active');
-          steps[2].classList.add('completed');
-          steps[3].classList.add('active');
-          processingStatusText.innerText = `Step 4/4: Denoising via ${getModelFriendlyName(activeModel)}...`;
+          if (steps[1]) { steps[1].classList.remove('active'); steps[1].classList.add('completed'); }
+          if (steps[2]) steps[2].classList.add('active');
+          if (processingStatusText) processingStatusText.innerText = "Step 3/4: Fetching Multi-temporal References...";
           
           setTimeout(() => {
-            steps[3].classList.remove('active');
-            steps[3].classList.add('completed');
+            if (steps[2]) { steps[2].classList.remove('active'); steps[2].classList.add('completed'); }
+            if (steps[3]) steps[3].classList.add('active');
+            if (processingStatusText) processingStatusText.innerText = `Step 4/4: Denoising via ${getModelFriendlyName(activeModel)}...`;
             
-            // Hide overlay
-            processingOverlay.classList.remove('visible');
-            btnReconstruct.disabled = false;
-            
-            // Re-render visuals
-            renderSandboxVisuals();
-            updateQuantitativeMetrics();
-            
-            // Slide divider automatically left to right to display reconstructed output
-            animateDividerTransition();
-          }, 800);
-        }, 550);
-      }, 650);
-    }, 500);
-  });
+            setTimeout(() => {
+              if (steps[3]) { steps[3].classList.remove('active'); steps[3].classList.add('completed'); }
+              
+              // Hide overlay
+              processingOverlay.classList.remove('visible');
+              btnReconstruct.disabled = false;
+              
+              // Re-render visuals
+              renderSandboxVisuals();
+              updateQuantitativeMetrics();
+              
+              // Slide divider automatically left to right to display reconstructed output
+              animateDividerTransition();
+            }, 800);
+          }, 550);
+        }, 650);
+      }, 500);
+    });
+  }
 
   // Slider swipe animation after reconstruction run
   function animateDividerTransition() {
@@ -836,76 +745,72 @@ document.addEventListener('DOMContentLoaded', () => {
     return "";
   }
 
-
   // --- Event Listeners for UI Controllers ---
-  
-  // Region Selector
-  regionSelector.addEventListener('change', (e) => {
-    activeRegion = e.target.value;
-    
-    // Update labels and coordinates
-    if (regionCoords[activeRegion]) {
-      infoRegionName.innerText = regionCoords[activeRegion].name;
-      infoCoords.innerText = regionCoords[activeRegion].coords;
-    }
-    
-    renderSandboxVisuals();
-    updateQuantitativeMetrics();
-  });
+  if (regionSelector) {
+    regionSelector.addEventListener('change', (e) => {
+      activeRegion = e.target.value;
+      if (regionCoords[activeRegion]) {
+        if (infoRegionName) infoRegionName.innerText = regionCoords[activeRegion].name;
+        if (infoCoords) infoCoords.innerText = regionCoords[activeRegion].coords;
+      }
+      renderSandboxVisuals();
+      updateQuantitativeMetrics();
+    });
+  }
 
-  // Generative AI Model Button group
   modelBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       modelBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeModel = btn.getAttribute('data-model');
-      
-      // Update label in slider overlay
-      rightLabelName.innerText = `RECONSTRUCTED (${activeModel.toUpperCase()})`;
-      
+      if (rightLabelName) rightLabelName.innerText = `RECONSTRUCTED (${activeModel.toUpperCase()})`;
       renderSandboxVisuals();
       updateQuantitativeMetrics();
     });
   });
 
-  // Sliders
-  sliderFidelity.addEventListener('input', (e) => {
-    reconstructionFidelity = parseInt(e.target.value);
-    sliderFidelityVal.innerText = `${reconstructionFidelity}%`;
-    renderSandboxVisuals();
-    updateQuantitativeMetrics();
-  });
+  if (sliderFidelity) {
+    sliderFidelity.addEventListener('input', (e) => {
+      reconstructionFidelity = parseInt(e.target.value);
+      if (sliderFidelityVal) sliderFidelityVal.innerText = `${reconstructionFidelity}%`;
+      renderSandboxVisuals();
+      updateQuantitativeMetrics();
+    });
+  }
 
-  sliderSar.addEventListener('input', (e) => {
-    sarWeight = parseInt(e.target.value);
-    sliderSarVal.innerText = `${sarWeight}%`;
-    
-    // If SAR weight drops to 0, warning should show in validation
-    renderSandboxVisuals();
-    updateQuantitativeMetrics();
-  });
+  if (sliderSar) {
+    sliderSar.addEventListener('input', (e) => {
+      sarWeight = parseInt(e.target.value);
+      if (sliderSarVal) sliderSarVal.innerText = `${sarWeight}%`;
+      renderSandboxVisuals();
+      updateQuantitativeMetrics();
+    });
+  }
 
-  // Checkbox toggles
-  toggleCloudMask.addEventListener('change', (e) => {
-    showCloudMask = e.target.checked;
-    renderSandboxVisuals();
-  });
+  if (toggleCloudMask) {
+    toggleCloudMask.addEventListener('change', (e) => {
+      showCloudMask = e.target.checked;
+      renderSandboxVisuals();
+    });
+  }
 
-  toggleSarGuide.addEventListener('change', (e) => {
-    showSarGuidance = e.target.checked;
-    renderSandboxVisuals();
-    updateQuantitativeMetrics();
-  });
-
+  if (toggleSarGuide) {
+    toggleSarGuide.addEventListener('change', (e) => {
+      showSarGuidance = e.target.checked;
+      renderSandboxVisuals();
+      updateQuantitativeMetrics();
+    });
+  }
 
   // --- Update Quantitative performance Metrics Panel ---
   function updateQuantitativeMetrics() {
+    if (!valSsim || !valPsnr || !valSam || !valF1) return;
+
     let ssim = 0.948;
     let psnr = 29.4;
     let sam = 0.052;
     let f1 = 0.965;
 
-    // Adjust bases by chosen generative model
     if (activeModel === 'diffusion') {
       ssim = 0.948;
       psnr = 29.4;
@@ -923,76 +828,53 @@ document.addEventListener('DOMContentLoaded', () => {
       f1 = 0.884;
     }
 
-    // Impact of LISS-IV Reconstruction Fidelity Slider
     const fidelityScale = reconstructionFidelity / 100;
     ssim *= (0.8 + 0.2 * fidelityScale);
     psnr -= (1 - fidelityScale) * 4.0;
     sam += (1 - fidelityScale) * 0.08;
 
-    // Impact of Sentinel-1 SAR Guidance toggle
     if (!showSarGuidance) {
-      // Without SAR guidance, spatial metrics degrade dramatically, especially in cloudy regions
       ssim -= 0.12;
       psnr -= 5.2;
       sam += 0.05;
       f1 -= 0.08;
     }
 
-    // Impact of SAR Weight Slider
     const sarWeightScale = sarWeight / 100;
     if (showSarGuidance) {
-      // Optimal weight is around 70-80%
       const deviation = Math.abs(sarWeightScale - 0.75);
       ssim -= deviation * 0.05;
       psnr -= deviation * 1.5;
     }
 
-    // Set values to DOM elements
     valSsim.innerText = ssim.toFixed(3);
     valPsnr.innerText = `${psnr.toFixed(1)} dB`;
     valSam.innerText = `${sam.toFixed(3)} rad`;
     valF1.innerText = f1.toFixed(3);
 
-    // Update lines/dots in quantitative tab
     updateSpectralBandGraph(ssim, psnr, sam);
   }
 
-  // --- Dynamic Spectral Line Chart Update ---
   function updateSpectralBandGraph(ssim, psnr, sam) {
     const dots = document.querySelectorAll('.spectral-dot.reconstructed');
-    const cloudyDots = document.querySelectorAll('.spectral-dot.cloudy');
-    const gtDots = document.querySelectorAll('.spectral-dot.ground-truth');
-
     if (dots.length < 3) return;
 
-    // Base reflectances:
-    // Green (Index 0): GT = 35%
-    // Red (Index 1): GT = 25%
-    // NIR (Index 2): GT = 65%
-    
-    // Reconstructed reflects how close we are to Ground Truth
-    // Diffusion aligns closest, CycleGAN deviates, no SAR degrades
-    let deviation = (1 - ssim) * 100; // percent offset
+    let deviation = (1 - ssim) * 100;
 
-    // Apply height offsets dynamically
     dots[0].style.bottom = `${35 + (activeModel === 'cyclegan' ? 6 : 2) * (Math.random() > 0.5 ? 1 : -1) * (deviation * 0.2)}%`;
     dots[1].style.bottom = `${25 + (activeModel === 'cyclegan' ? 8 : 1) * (Math.random() > 0.5 ? 1 : -1) * (deviation * 0.2)}%`;
     dots[2].style.bottom = `${65 + (activeModel === 'cyclegan' ? 12 : 3) * (Math.random() > 0.5 ? 1 : -1) * (deviation * 0.2)}%`;
 
-    // update tooltips values
     dots[0].setAttribute('data-value', `LDM Reconstructed: ${(parseFloat(dots[0].style.bottom) / 100).toFixed(2)}`);
     dots[1].setAttribute('data-value', `LDM Reconstructed: ${(parseFloat(dots[1].style.bottom) / 100).toFixed(2)}`);
     dots[2].setAttribute('data-value', `LDM Reconstructed: ${(parseFloat(dots[2].style.bottom) / 100).toFixed(2)}`);
   }
 
-  // --- Animate LULC charts on tab select ---
   function animateLulcCharts() {
     const barsCloudy = document.querySelectorAll('.bar-item.cloudy');
     const barsRecon = document.querySelectorAll('.bar-item.reconstructed');
 
-    // Reset heights to 0 first, then animate
     const originalCloudyHeights = ['38%', '25%', '48%', '52%', '30%'];
-    
     let originalReconHeights = ['94%', '91%', '88%', '95%', '82%'];
     if (activeModel === 'transformer') {
       originalReconHeights = ['88%', '86%', '80%', '90%', '76%'];
@@ -1029,7 +911,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const gridPoints = 40;
   const terrainZ = [];
   
-  // Generate terrain height matrix
   for (let x = 0; x < gridPoints; x++) {
     terrainZ[x] = [];
     for (let y = 0; y < gridPoints; y++) {
@@ -1037,13 +918,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const dy = (y - 20) / 10;
       let z = Math.sin(dx * 0.8) * Math.cos(dy * 0.8) * 3;
       z += Math.cos(dx * 0.3) * Math.sin(dy * 0.4) * 4;
-      z += Math.sin(dx * 2.2) * Math.cos(dy * 1.8) * 0.5; // Fine resolution roughness
+      z += Math.sin(dx * 2.2) * Math.cos(dy * 1.8) * 0.5;
       terrainZ[x][y] = z;
     }
   }
 
   let isDraggingDehazing = false;
-  let dehazingPosition = 50; // split percent
+  let dehazingPosition = 50;
   let dehazingImgLoaded = false;
   
   const dehazingImg = new Image();
@@ -1066,93 +947,95 @@ document.addEventListener('DOMContentLoaded', () => {
     const sliderHeightVal = document.getElementById('slider-3d-height-val');
 
     const dehazingSliderContainer = document.getElementById('dehazing-slider-container');
-    const dehazingSliderOverlay = document.getElementById('dehazing-slider-overlay');
-    const dehazingSliderDivider = document.getElementById('dehazing-slider-divider');
-
     const parallaxContainer = document.getElementById('parallax-container');
     const canvasParaBg = document.getElementById('canvas-parallax-bg');
     const canvasParaFg = document.getElementById('canvas-parallax-fg');
 
     if (!canvas3d) return;
 
-    // Set sizes of canvases
-    const rect3d = canvas3d.parentElement.getBoundingClientRect();
-    canvas3d.width = rect3d.width;
-    canvas3d.height = rect3d.height;
+    const rect3d = canvas3d.parentElement ? canvas3d.parentElement.getBoundingClientRect() : { width: 600, height: 420 };
+    canvas3d.width = rect3d.width || 600;
+    canvas3d.height = rect3d.height || 420;
 
-    const rectDehaze = dehazingSliderContainer.getBoundingClientRect();
-    const canvasDehazeHazy = document.getElementById('canvas-dehazing-hazy');
-    const canvasDehazeClear = document.getElementById('canvas-dehazing-clear');
-    
-    if (canvasDehazeHazy && canvasDehazeClear) {
-      canvasDehazeHazy.width = rectDehaze.width;
-      canvasDehazeHazy.height = rectDehaze.height;
-      canvasDehazeClear.width = rectDehaze.width;
-      canvasDehazeClear.height = rectDehaze.height;
+    if (dehazingSliderContainer) {
+      const rectDehaze = dehazingSliderContainer.getBoundingClientRect();
+      const canvasDehazeHazy = document.getElementById('canvas-dehazing-hazy');
+      const canvasDehazeClear = document.getElementById('canvas-dehazing-clear');
+      
+      if (canvasDehazeHazy && canvasDehazeClear) {
+        canvasDehazeHazy.width = rectDehaze.width || 500;
+        canvasDehazeHazy.height = rectDehaze.height || 420;
+        canvasDehazeClear.width = rectDehaze.width || 500;
+        canvasDehazeClear.height = rectDehaze.height || 420;
+      }
     }
 
-    if (canvasParaBg && canvasParaFg) {
+    if (parallaxContainer && canvasParaBg && canvasParaFg) {
       const rectPara = parallaxContainer.getBoundingClientRect();
-      canvasParaBg.width = rectPara.width;
-      canvasParaBg.height = rectPara.height;
-      canvasParaFg.width = rectPara.width;
-      canvasParaFg.height = rectPara.height;
+      canvasParaBg.width = rectPara.width || 400;
+      canvasParaBg.height = rectPara.height || 260;
+      canvasParaFg.width = rectPara.width || 400;
+      canvasParaFg.height = rectPara.height || 260;
     }
 
-    // Render static image crops
     renderDehazingCanvases();
 
-    // Event listener configurations (Only bind once)
     if (!threeDeeInitialized) {
-      // 3D control hooks
-      btnDecloud.addEventListener('click', () => {
-        show3dClouds = !show3dClouds;
-        btnDecloud.style.background = show3dClouds ? '' : 'rgba(245, 158, 11, 0.15)';
-        btnDecloud.style.borderColor = show3dClouds ? '' : 'rgba(245, 158, 11, 0.3)';
-        btnDecloud.querySelector('span').innerText = show3dClouds ? "Hide Cloud Layer" : "Reconstruct Surface (De-cloud)";
-      });
+      if (btnDecloud) {
+        btnDecloud.addEventListener('click', () => {
+          show3dClouds = !show3dClouds;
+          btnDecloud.style.background = show3dClouds ? '' : 'rgba(245, 158, 11, 0.15)';
+          btnDecloud.style.borderColor = show3dClouds ? '' : 'rgba(245, 158, 11, 0.3)';
+          const labelSpan = btnDecloud.querySelector('span');
+          if (labelSpan) labelSpan.innerText = show3dClouds ? "Hide Cloud Layer" : "Reconstruct Surface (De-cloud)";
+        });
+      }
 
-      btnRotate.addEventListener('click', () => {
-        autoRotate3d = !autoRotate3d;
-        btnRotate.querySelector('span').innerText = `Auto Rotate: ${autoRotate3d ? "ON" : "OFF"}`;
-        btnRotate.style.borderColor = autoRotate3d ? 'var(--border-color)' : 'rgba(6, 182, 212, 0.4)';
-      });
+      if (btnRotate) {
+        btnRotate.addEventListener('click', () => {
+          autoRotate3d = !autoRotate3d;
+          const labelSpan = btnRotate.querySelector('span');
+          if (labelSpan) labelSpan.innerText = `Auto Rotate: ${autoRotate3d ? "ON" : "OFF"}`;
+          btnRotate.style.borderColor = autoRotate3d ? 'var(--border-color)' : 'rgba(6, 182, 212, 0.4)';
+        });
+      }
 
-      sliderAlt.addEventListener('input', (e) => {
-        cloud3dAlt = parseInt(e.target.value);
-        sliderAltVal.innerText = `${cloud3dAlt}m`;
-      });
+      if (sliderAlt) {
+        sliderAlt.addEventListener('input', (e) => {
+          cloud3dAlt = parseInt(e.target.value);
+          if (sliderAltVal) sliderAltVal.innerText = `${cloud3dAlt}m`;
+        });
+      }
 
-      sliderHeight.addEventListener('input', (e) => {
-        elevationScale = parseInt(e.target.value) / 10;
-        sliderHeightVal.innerText = `${elevationScale.toFixed(1)}x`;
-      });
+      if (sliderHeight) {
+        sliderHeight.addEventListener('input', (e) => {
+          elevationScale = parseInt(e.target.value) / 10;
+          if (sliderHeightVal) sliderHeightVal.innerText = `${elevationScale.toFixed(1)}x`;
+        });
+      }
 
-      // Mouse drag rotation & Click selection on 3D canvas
       let isDragging3d = false;
-      let wasDragging3d = false;
       let prevMouseX = 0;
       let prevMouseY = 0;
 
       canvas3d.addEventListener('mousedown', (e) => {
         isDragging3d = true;
-        wasDragging3d = false;
         prevMouseX = e.clientX;
         prevMouseY = e.clientY;
         autoRotate3d = false;
-        btnRotate.querySelector('span').innerText = "Auto Rotate: OFF";
+        if (btnRotate) {
+          const labelSpan = btnRotate.querySelector('span');
+          if (labelSpan) labelSpan.innerText = "Auto Rotate: OFF";
+        }
       });
 
       window.addEventListener('mousemove', (e) => {
         if (!isDragging3d) return;
         const deltaX = e.clientX - prevMouseX;
         const deltaY = e.clientY - prevMouseY;
-        if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
-          wasDragging3d = true;
-        }
-        rotationY += deltaX * 0.007; // Yaw
-        rotationX += deltaY * 0.007; // Pitch
-        rotationX = Math.max(-1.3, Math.min(-0.15, rotationX)); // Clamp vertical rotation
+        rotationY += deltaX * 0.007;
+        rotationX += deltaY * 0.007;
+        rotationX = Math.max(-1.3, Math.min(-0.15, rotationX));
         prevMouseX = e.clientX;
         prevMouseY = e.clientY;
       });
@@ -1161,106 +1044,68 @@ document.addEventListener('DOMContentLoaded', () => {
         isDragging3d = false;
       });
 
-      canvas3d.addEventListener('click', (e) => {
-        if (wasDragging3d) {
-          wasDragging3d = false;
-          return;
+      if (dehazingSliderContainer) {
+        function getDehazeMouseX(e) {
+          const rect = dehazingSliderContainer.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          return clientX - rect.left;
         }
 
-        const rect = canvas3d.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
+        dehazingSliderContainer.addEventListener('mousedown', (e) => {
+          isDraggingDehazing = true;
+          const mouseX = getDehazeMouseX(e);
+          const w = dehazingSliderContainer.getBoundingClientRect().width;
+          if (w > 0) dehazingPosition = (mouseX / w) * 100;
+          updateDehazingSlider();
+          e.preventDefault();
+        });
 
-        // Check if hit any building projected bounding box
-        let hitB = null;
-        for (const b of buildings) {
-          if (b.projected &&
-              mouseX >= b.projected.minX && mouseX <= b.projected.maxX &&
-              mouseY >= b.projected.minY && mouseY <= b.projected.maxY) {
-            hitB = b;
-            break;
-          }
-        }
-
-        if (hitB) {
-          triggerBuildingFlash(hitB);
-          const query = hitB.queries[chatLanguage] || hitB.queries.en;
-          
-          // Open Chat UI
-          openChat();
-          
-          // Autofill and focus
-          civicChatInput.value = query;
-          civicChatInput.focus();
-        }
-      });
-
-      // Dehazing split screen events
-      function getDehazeMouseX(e) {
-        const rect = dehazingSliderContainer.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        return clientX - rect.left;
+        dehazingSliderContainer.addEventListener('touchstart', (e) => {
+          isDraggingDehazing = true;
+          const mouseX = getDehazeMouseX(e);
+          const w = dehazingSliderContainer.getBoundingClientRect().width;
+          if (w > 0) dehazingPosition = (mouseX / w) * 100;
+          updateDehazingSlider();
+        });
       }
 
-      dehazingSliderContainer.addEventListener('mousedown', (e) => {
-        isDraggingDehazing = true;
-        const mouseX = getDehazeMouseX(e);
-        const w = dehazingSliderContainer.getBoundingClientRect().width;
-        dehazingPosition = (mouseX / w) * 100;
-        updateDehazingSlider();
-        e.preventDefault();
-      });
-
       window.addEventListener('mousemove', (e) => {
-        if (!isDraggingDehazing) return;
-        const mouseX = getDehazeMouseX(e);
-        const w = dehazingSliderContainer.getBoundingClientRect().width;
-        dehazingPosition = (mouseX / w) * 100;
+        if (!isDraggingDehazing || !dehazingSliderContainer) return;
+        const rect = dehazingSliderContainer.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const mouseX = clientX - rect.left;
+        const w = rect.width;
+        if (w > 0) dehazingPosition = (mouseX / w) * 100;
         updateDehazingSlider();
       });
 
       window.addEventListener('mouseup', () => {
         isDraggingDehazing = false;
       });
-
-      // Touch events for Dehazing Split
-      dehazingSliderContainer.addEventListener('touchstart', (e) => {
-        isDraggingDehazing = true;
-        const mouseX = getDehazeMouseX(e);
-        const w = dehazingSliderContainer.getBoundingClientRect().width;
-        dehazingPosition = (mouseX / w) * 100;
-        updateDehazingSlider();
-      });
-      window.addEventListener('touchmove', (e) => {
-        if (!isDraggingDehazing) return;
-        const mouseX = getDehazeMouseX(e);
-        const w = dehazingSliderContainer.getBoundingClientRect().width;
-        dehazingPosition = (mouseX / w) * 100;
-        updateDehazingSlider();
-      });
       window.addEventListener('touchend', () => {
         isDraggingDehazing = false;
       });
 
-      // Parallax mouse movements
-      parallaxContainer.addEventListener('mousemove', (e) => {
-        const rect = parallaxContainer.getBoundingClientRect();
-        const mouseX = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to +0.5
-        const mouseY = (e.clientY - rect.top) / rect.height - 0.5;
-        
-        canvasParaBg.style.transform = `translate(${mouseX * -10}px, ${mouseY * -10}px) scale(1.08)`;
-        canvasParaFg.style.transform = `translate(${mouseX * 18}px, ${mouseY * 18}px) scale(1.12)`;
-      });
+      if (parallaxContainer && canvasParaBg && canvasParaFg) {
+        parallaxContainer.addEventListener('mousemove', (e) => {
+          const rect = parallaxContainer.getBoundingClientRect();
+          if (rect.width === 0 || rect.height === 0) return;
+          const mouseX = (e.clientX - rect.left) / rect.width - 0.5;
+          const mouseY = (e.clientY - rect.top) / rect.height - 0.5;
+          
+          canvasParaBg.style.transform = `translate(${mouseX * -10}px, ${mouseY * -10}px) scale(1.08)`;
+          canvasParaFg.style.transform = `translate(${mouseX * 18}px, ${mouseY * 18}px) scale(1.12)`;
+        });
 
-      parallaxContainer.addEventListener('mouseleave', () => {
-        canvasParaBg.style.transform = 'translate(0px, 0px) scale(1.08)';
-        canvasParaFg.style.transform = 'translate(0px, 0px) scale(1.12)';
-      });
+        parallaxContainer.addEventListener('mouseleave', () => {
+          canvasParaBg.style.transform = 'translate(0px, 0px) scale(1.08)';
+          canvasParaFg.style.transform = 'translate(0px, 0px) scale(1.12)';
+        });
+      }
 
       threeDeeInitialized = true;
     }
 
-    // Start 3D rendering loop
     if (threeDeeAnimationId) {
       cancelAnimationFrame(threeDeeAnimationId);
     }
@@ -1269,7 +1114,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (activeTab !== 'threedee') return;
       
       if (autoRotate3d) {
-        rotationY += 0.003; // Rotate yaw slowly
+        rotationY += 0.003;
       }
 
       draw3dTerrainMesh(canvas3d);
@@ -1282,9 +1127,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Procedural 3D Mesh Draw logic ---
   function draw3dTerrainMesh(canvas) {
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const w = canvas.width;
     const h = canvas.height;
+    if (w === 0 || h === 0) return;
 
     ctx.clearRect(0, 0, w, h);
     ctx.lineJoin = 'round';
@@ -1297,23 +1144,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const cosX = Math.cos(rotationX);
     const sinX = Math.sin(rotationX);
 
-    // Grid screen coordinate cache
     const screenCoords = [];
 
-    // 1. Calculate projected positions of all mountain points
+    // 1. Calculate projected positions of mountain terrain points
     for (let x = 0; x < gridPoints; x++) {
       screenCoords[x] = [];
       for (let y = 0; y < gridPoints; y++) {
-        // Center-relative coordinates
         const gx = (x - 20) * 11.5;
         const gy = (y - 20) * 11.5;
         const gz = terrainZ[x][y] * elevationScale * 2.5;
 
-        // Yaw transformation
         const rx = gx * cosY - gy * sinY;
         const ry = gx * sinY + gy * cosY;
 
-        // Pitch transformation
         const px = rx;
         const py = ry * cosX - gz * sinX;
 
@@ -1325,11 +1168,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 2. Draw Cloud Shadows onto the terrain points (if toggled)
+    // 2. Draw Cloud Shadows onto terrain (if toggled)
     if (show3dClouds) {
       const sdx = 15;
       const sdy = 20;
-      
       ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
       
       const shadowCenters = [
@@ -1341,7 +1183,6 @@ document.addEventListener('DOMContentLoaded', () => {
       shadowCenters.forEach(c => {
         const rx = c.x * cosY - c.y * sinY;
         const ry = c.x * sinY + c.y * cosY;
-        
         const px = rx + sdx;
         const py = ry * cosX + sdy;
         
@@ -1351,18 +1192,17 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // 3. Draw Grid Lines connecting points (wireframe)
+    // 3. Draw Wireframe Grid Lines
     for (let x = 0; x < gridPoints; x++) {
       for (let y = 0; y < gridPoints; y++) {
         const A = screenCoords[x][y];
         
-        // Color height coding
         if (A.z > 10.5) {
-          ctx.strokeStyle = 'rgba(241, 245, 249, 0.55)'; // Snow peaks (White)
+          ctx.strokeStyle = 'rgba(241, 245, 249, 0.55)'; // Snow peaks
         } else if (A.z > 2.5) {
-          ctx.strokeStyle = 'rgba(163, 230, 53, 0.3)';   // Mountain slopes (Lime Green)
+          ctx.strokeStyle = 'rgba(163, 230, 53, 0.3)';   // Mountain slopes
         } else {
-          ctx.strokeStyle = 'rgba(6, 182, 212, 0.22)';    // Valleys / Rivers (Cyan)
+          ctx.strokeStyle = 'rgba(6, 182, 212, 0.22)';    // Valleys
         }
 
         ctx.lineWidth = A.z > 10.5 ? 1.5 : 0.8;
@@ -1385,113 +1225,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 3.5 Draw 3D Buildings
-    buildings.forEach(b => {
-      // Base center calculations
-      const gx1 = (b.gridX - 20) * 11.5;
-      const gy1 = (b.gridY - 20) * 11.5;
-      const gx2 = gx1 + b.width * 11.5;
-      const gy2 = gy1 + b.depth * 11.5;
-      
-      const baseZ = terrainZ[b.gridX][b.gridY] * elevationScale * 2.5;
-      const buildH = b.height * elevationScale; // scale height with terrain scale
-      
-      const s0 = project3d(gx1, gy1, baseZ);
-      const s1 = project3d(gx2, gy1, baseZ);
-      const s2 = project3d(gx2, gy2, baseZ);
-      const s3 = project3d(gx1, gy2, baseZ);
-      
-      const s4 = project3d(gx1, gy1, baseZ + buildH);
-      const s5 = project3d(gx2, gy1, baseZ + buildH);
-      const s6 = project3d(gx2, gy2, baseZ + buildH);
-      const s7 = project3d(gx1, gy2, baseZ + buildH);
-      
-      // Bounding box for clicks
-      const allX = [s0.x, s1.x, s2.x, s3.x, s4.x, s5.x, s6.x, s7.x];
-      const allY = [s0.y, s1.y, s2.y, s3.y, s4.y, s5.y, s6.y, s7.y];
-      b.projected = {
-        minX: Math.min(...allX),
-        maxX: Math.max(...allX),
-        minY: Math.min(...allY),
-        maxY: Math.max(...allY)
-      };
-      
-      // Flash animation frame decrementation
-      let fillOpacity = 0.15;
-      if (b.flashFrame && b.flashFrame > 0) {
-        fillOpacity += (b.flashFrame / 15) * 0.45;
-        b.flashFrame--;
-      }
-      
-      const sideFill = b.color.replace('0.8', fillOpacity.toFixed(2));
-      const topFill = b.color.replace('0.8', (fillOpacity + 0.15).toFixed(2));
-      const strokeColor = b.color;
-      
-      const drawFace = (pts, fill, stroke) => {
-        ctx.beginPath();
-        ctx.moveTo(pts[0].x, pts[0].y);
-        for (let i = 1; i < pts.length; i++) {
-          ctx.lineTo(pts[i].x, pts[i].y);
-        }
-        ctx.closePath();
-        ctx.fillStyle = fill;
-        ctx.fill();
-        ctx.strokeStyle = stroke;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      };
-      
-      // Draw side faces
-      drawFace([s0, s1, s5, s4], sideFill, strokeColor);
-      drawFace([s1, s2, s6, s5], sideFill, strokeColor);
-      drawFace([s2, s3, s7, s6], sideFill, strokeColor);
-      drawFace([s3, s0, s4, s7], sideFill, strokeColor);
-      
-      // Draw top face
-      drawFace([s4, s5, s6, s7], topFill, strokeColor);
-      
-      // Label positioning (top center)
-      const labelX = (s4.x + s5.x + s6.x + s7.x) / 4;
-      const labelY = (s4.y + s5.y + s6.y + s7.y) / 4 - 15;
-      
-      // Draw anchor pin line
-      ctx.strokeStyle = strokeColor;
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(labelX, labelY + 10);
-      ctx.lineTo(labelX, labelY + 18);
-      ctx.stroke();
-      
-      // Draw text bubble
-      const labelText = b.name[chatLanguage] || b.name.en;
-      ctx.font = "bold 9px Inter, system-ui, sans-serif";
-      const textWidth = ctx.measureText(labelText).width;
-      
-      const padX = 6;
-      const padY = 4;
-      const capW = textWidth + padX * 2;
-      const capH = 12 + padY * 2;
-      const capX = labelX - capW / 2;
-      const capY = labelY - capH / 2;
-      
-      ctx.fillStyle = "rgba(10, 15, 30, 0.9)";
-      ctx.strokeStyle = strokeColor;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(capX, capY, capW, capH, 4);
-      ctx.fill();
-      ctx.stroke();
-      
-      ctx.fillStyle = "#f8fafc";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(labelText, labelX, labelY + 1);
-    });
-
-    // 4. Draw Floating Cloud wireframes above the mountain terrain
+    // 4. Draw Floating Clouds
     if (show3dClouds) {
-      const cz = cloud3dAlt * 0.65; // Altitude scale
-      
+      const cz = cloud3dAlt * 0.65;
       const cloudPuffs = [
         {x: -70, y: -50, r: 85},
         {x: 60, y: 70, r: 100},
@@ -1505,17 +1241,14 @@ document.addEventListener('DOMContentLoaded', () => {
       cloudPuffs.forEach(c => {
         const rx = c.x * cosY - c.y * sinY;
         const ry = c.x * sinY + c.y * cosY;
-        
         const px = rx;
         const py = ry * cosX - cz * sinX;
 
-        // Draw cloud circle projected elliptically due to angle
         ctx.beginPath();
         ctx.ellipse(centerX + px, centerY + py - 35, c.r, c.r * 0.5 * cosX, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // Draw an inner volume circle
         ctx.beginPath();
         ctx.ellipse(centerX + px - 10, centerY + py - 40, c.r * 0.6, c.r * 0.3 * cosX, 0, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
@@ -1524,7 +1257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- Crop Dehazing Images & Parallax layers from single JPG ---
+  // --- Crop Dehazing Images & Parallax layers ---
   function renderDehazingCanvases() {
     if (!dehazingImgLoaded) return;
 
@@ -1543,38 +1276,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const wSrc = dehazingImg.width;
     const hSrc = dehazingImg.height;
 
-    // Clear canvases
     [ctxHazy, ctxClear, ctxParaBg, ctxParaFg].forEach(ctx => {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     });
 
-    // 1. Draw Hazy Input canvas (left half of dehazing_demo.jpg)
     ctxHazy.drawImage(
       dehazingImg, 
-      0, 0, wSrc / 2, hSrc - 60, // Crop out subfigure bottom label coordinates
+      0, 0, wSrc / 2, hSrc - 60,
       0, 0, canvasHazy.width, canvasHazy.height
     );
 
-    // 2. Draw Dehazed Recovery canvas (right half of dehazing_demo.jpg)
     ctxClear.drawImage(
       dehazingImg, 
       wSrc / 2, 0, wSrc / 2, hSrc - 60,
       0, 0, canvasClear.width, canvasClear.height
     );
 
-    // 3. Draw Parallax Background canvas (Dehazed building, right half)
     ctxParaBg.drawImage(
       dehazingImg, 
       wSrc / 2, 0, wSrc / 2, hSrc - 60,
       0, 0, canvasParaBg.width, canvasParaBg.height
     );
 
-    // 4. Draw Parallax Foreground canvas (Procedural branches & foliage overlay)
     const wDest = canvasParaFg.width;
     const hDest = canvasParaFg.height;
 
-    // Draw main foliage branches in front of the building
-    ctxParaFg.strokeStyle = '#052e16'; // Deep bark green
+    ctxParaFg.strokeStyle = '#052e16';
     ctxParaFg.lineWidth = 5;
     ctxParaFg.lineCap = 'round';
     
@@ -1589,7 +1316,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ctxParaFg.quadraticCurveTo(wDest * 0.16, hDest * 0.52, wDest * 0.32, hDest * 0.56);
     ctxParaFg.stroke();
 
-    // Draw leaf groupings (similar green clusters)
     const foliageCluster = [
       {x: wDest * 0.12, y: hDest * 0.2, r: 20},
       {x: wDest * 0.22, y: hDest * 0.29, r: 26},
@@ -1598,26 +1324,22 @@ document.addEventListener('DOMContentLoaded', () => {
       {x: wDest * 0.24, y: hDest * 0.52, r: 18},
       {x: wDest * 0.31, y: hDest * 0.56, r: 20},
       {x: wDest * 0.05, y: hDest * 0.32, r: 24},
-      // Hanging branch from top
       {x: wDest * 0.42, y: hDest * 0.08, r: 16},
       {x: wDest * 0.55, y: hDest * 0.05, r: 22},
       {x: wDest * 0.68, y: hDest * 0.14, r: 18}
     ];
 
     foliageCluster.forEach(l => {
-      // Dark base leaf shadow
       ctxParaFg.fillStyle = '#14532d';
       ctxParaFg.beginPath();
       ctxParaFg.arc(l.x, l.y, l.r, 0, Math.PI * 2);
       ctxParaFg.fill();
 
-      // Bright leaf highlight overlay
       ctxParaFg.fillStyle = '#22c55e';
       ctxParaFg.beginPath();
       ctxParaFg.arc(l.x - l.r * 0.2, l.y - l.r * 0.2, l.r * 0.65, 0, Math.PI * 2);
       ctxParaFg.fill();
       
-      // Top leaf details
       ctxParaFg.fillStyle = '#4ade80';
       ctxParaFg.beginPath();
       ctxParaFg.arc(l.x - l.r * 0.35, l.y - l.r * 0.35, l.r * 0.3, 0, Math.PI * 2);
@@ -1634,203 +1356,11 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.style.clipPath = `polygon(${dehazingPosition}% 0, 100% 0, 100% 100%, ${dehazingPosition}% 100%)`;
   }
 
-  // ==========================================================================
-  // Civic Companion Chat Logic & Event Handlers
-  // ==========================================================================
-
-  // DOM Elements for Civic Chat
-  const civicChatFab = document.getElementById('civic-chat-fab');
-  const civicChatWindow = document.getElementById('civic-chat-window');
-  const civicChatClose = document.getElementById('civic-chat-close');
-  const civicChatMessages = document.getElementById('civic-chat-messages');
-  const civicChatInput = document.getElementById('civic-chat-input');
-  const civicChatForm = document.getElementById('civic-chat-form');
-  const civicChatTyping = document.getElementById('civic-chat-typing');
-  const civicTypingText = document.getElementById('civic-typing-text');
-  const civicCompanionTitle = document.getElementById('civic-companion-title');
-  const civicStatus = document.getElementById('civic-status');
-
-  const langBtnEn = document.getElementById('lang-btn-en');
-  const langBtnHi = document.getElementById('lang-btn-hi');
-  const langBtnTa = document.getElementById('lang-btn-ta');
-
-  // Toggle Panel Open/Close
-  function openChat() {
-    chatIsOpen = true;
-    if (civicChatWindow) {
-      civicChatWindow.classList.remove('hidden');
-      // Force reflow for transition
-      civicChatWindow.offsetHeight;
-      civicChatWindow.classList.remove('scale-95', 'opacity-0');
-      civicChatWindow.classList.add('scale-100', 'opacity-100');
-    }
-  }
-
-  function closeChat() {
-    chatIsOpen = false;
-    if (civicChatWindow) {
-      civicChatWindow.classList.remove('scale-100', 'opacity-100');
-      civicChatWindow.classList.add('scale-95', 'opacity-0');
-    }
-    setTimeout(() => {
-      if (!chatIsOpen && civicChatWindow) {
-        civicChatWindow.classList.add('hidden');
-      }
-    }, 300);
-  }
-
-  if (civicChatFab) {
-    civicChatFab.addEventListener('click', () => {
-      if (chatIsOpen) closeChat();
-      else openChat();
-    });
-  }
-
-  if (civicChatClose) {
-    civicChatClose.addEventListener('click', closeChat);
-  }
-
-  // Set Language UI Updates
-  function setLanguage(lang) {
-    chatLanguage = lang;
-    
-    // Highlight active button
-    if (langBtnEn && langBtnHi && langBtnTa) {
-      [langBtnEn, langBtnHi, langBtnTa].forEach(btn => {
-        if (btn.getAttribute('data-lang') === lang) {
-          btn.className = "px-2 py-1 rounded-md transition-all duration-200 cursor-pointer bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold";
-        } else {
-          btn.className = "px-2 py-1 rounded-md transition-all duration-200 cursor-pointer hover:text-slate-200 font-bold";
-        }
-      });
-    }
-
-    // Update static labels
-    const t = chatTranslations[lang];
-    if (civicCompanionTitle) civicCompanionTitle.innerText = t.title;
-    if (civicStatus) civicStatus.innerText = t.status;
-    if (civicChatInput) civicChatInput.placeholder = t.placeholder;
-    if (civicTypingText) civicTypingText.innerText = t.thinking;
-
-    // Reset conversation history with welcome message in chosen language
-    chatMessages.length = 0;
-    if (civicChatMessages) {
-      civicChatMessages.innerHTML = '';
-      addBotMessage(t.welcome);
-    }
-  }
-
-  if (langBtnEn) langBtnEn.addEventListener('click', (e) => { e.stopPropagation(); setLanguage('en'); });
-  if (langBtnHi) langBtnHi.addEventListener('click', (e) => { e.stopPropagation(); setLanguage('hi'); });
-  if (langBtnTa) langBtnTa.addEventListener('click', (e) => { e.stopPropagation(); setLanguage('ta'); });
-
-  // Message adding helpers
-  function addUserMessage(text) {
-    chatMessages.push({ sender: 'user', text });
-    
-    if (civicChatMessages) {
-      const msgDiv = document.createElement('div');
-      msgDiv.className = "flex items-start justify-end space-x-2.5 max-w-[85%] ml-auto";
-      msgDiv.innerHTML = `
-        <div class="bg-gradient-to-tr from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30 px-3.5 py-2.5 rounded-2xl rounded-tr-sm text-[11px] text-slate-100 leading-relaxed shadow-md break-words">
-          ${text}
-        </div>
-      `;
-      civicChatMessages.appendChild(msgDiv);
-      civicChatMessages.scrollTop = civicChatMessages.scrollHeight;
-    }
-  }
-
-  // Make addBotMessage global so it can be called from outside
-  window.addBotMessage = function(text) {
-    chatMessages.push({ sender: 'bot', text });
-    
-    if (civicChatMessages) {
-      const msgDiv = document.createElement('div');
-      msgDiv.className = "flex items-start space-x-2.5 max-w-[85%] animate-fade-in";
-      msgDiv.innerHTML = `
-        <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-500/10 to-indigo-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0 mt-0.5 shadow-sm">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25"></path>
-          </svg>
-        </div>
-        <div class="bg-slate-900/60 border border-slate-800/80 px-3.5 py-2.5 rounded-2xl rounded-tl-sm text-[11px] text-slate-200 leading-relaxed shadow-md break-words">
-          ${text}
-        </div>
-      `;
-      civicChatMessages.appendChild(msgDiv);
-      civicChatMessages.scrollTop = civicChatMessages.scrollHeight;
-    }
-  }
-  
-  const addBotMessage = window.addBotMessage;
-
-  // Submit form handler
-  if (civicChatForm) {
-    civicChatForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (!civicChatInput) return;
-      const query = civicChatInput.value.trim();
-      if (!query) return;
-
-      addUserMessage(query);
-      civicChatInput.value = '';
-
-      // Trigger typing / loading state
-      if (civicChatTyping) {
-        civicChatTyping.classList.remove('hidden');
-      }
-      if (civicChatMessages) {
-        civicChatMessages.scrollTop = civicChatMessages.scrollHeight;
-      }
-
-      setTimeout(() => {
-        if (civicChatTyping) {
-          civicChatTyping.classList.add('hidden');
-        }
-        
-        // Determine reply
-        let reply = '';
-        const t = chatTranslations[chatLanguage];
-        
-        // Simple logic to match buildings in active query
-        let matchedBuilding = null;
-        const qLower = query.toLowerCase();
-        
-        if (qLower.includes('hall') || query.includes('नगर') || query.includes('மண்டபம்')) {
-          matchedBuilding = "City Hall";
-        } else if (qLower.includes('power') || query.includes('बिजली') || query.includes('மின்')) {
-          matchedBuilding = "Power Station";
-        } else if (qLower.includes('water') || query.includes('जल') || query.includes('நீர்')) {
-          matchedBuilding = "Water Treatment Facility";
-        }
-
-        if (matchedBuilding) {
-          reply = t.buildingReplies[matchedBuilding];
-        } else {
-          reply = t.defaultReply;
-        }
-
-        addBotMessage(reply);
-      }, 1200);
-    });
-  }
-
-  // Init welcome message on load
-  setLanguage('en');
-
-  // Trigger visual flash for a building on canvas
-  function triggerBuildingFlash(b) {
-    b.flashFrame = 15; // Set flash animation duration in frames
-  }
-
   // --- Initial Setup Execution ---
-  // Run on start
   setTimeout(() => {
+    switchTab('overview');
     resizeCanvases();
     updateQuantitativeMetrics();
-    initThreeDeeTab();
-    openChat();
-  }, 200);
+  }, 100);
 
 });
