@@ -89,19 +89,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Background Image Mapping for Tabs ---
   const tabBackgrounds = {
-    overview: 'bg_overview.jpg',
-    sandbox: 'bg_sandbox.jpg',
-    threedee: 'bg_threedee.png',
-    architectures: 'bg_threedee.png',
-    metrics: 'bg_sandbox.jpg',
-    details: 'bg_overview.jpg'
+    overview: '/bg_overview.jpg',
+    sandbox: '/bg_sandbox.jpg',
+    threedee: '/bg_threedee.png',
+    architectures: '/bg_threedee.png',
+    metrics: '/bg_sandbox.jpg',
+    details: '/bg_overview.jpg'
   };
 
   const bgLayer = document.getElementById('parallax-bg-layer');
 
   function updateTabBackground(tabId) {
     if (!bgLayer) return;
-    const bgImg = tabBackgrounds[tabId] || 'bg_overview.jpg';
+    const bgImg = tabBackgrounds[tabId] || '/bg_overview.jpg';
     bgLayer.style.backgroundImage = `url('${bgImg}')`;
   }
 
@@ -973,7 +973,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let dehazingImgLoaded = false;
   
   const dehazingImg = new Image();
-  dehazingImg.src = 'dehazing_demo.jpg';
+  dehazingImg.src = '/dehazing_demo.jpg';
   dehazingImg.onload = () => {
     dehazingImgLoaded = true;
     if (activeTab === 'threedee') {
